@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Capture Photo</title>
+
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    var pictureSource;   // picture source
+    var destinationType; // sets the format of returned value
+
+    // Wait for device API libraries to load
+    //
+    document.addEventListener("deviceready",onDeviceReady,false);
+
+    // device APIs are available
+    //
+    function onDeviceReady() {
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+    }
+    
+	function uploadFromGallery() {
+
+    // Retrieve image file location from specified source
+    navigator.camera.getPicture(uploadPhoto,
+                                function(message) { alert('get picture failed'); },
+                                { quality: 50, 
+                                destinationType: destinationType,
+                                sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY }
+                                );
+
+}
+
+function uploadPhoto(imageURI) {
+    var options = new FileUploadOptions();
+    options.fileKey="file";
+    options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1)+'.png';
+    options.mimeType="text/plain";
+
+    var params = new Object();
+
+    options.params = params;
+
+    var ft = new FileTransfer();
+    ft.upload(imageURI, encodeURI("http://www.aditechsolutions.com/Nitesh/Indiaat75/test.php"), win, fail, options);
+} 
+
+function win(r) {
+    console.log("Code = " + r.responseCode);
+    console.log("Response = " + r.response);
+    console.log("Sent = " + r.bytesSent);
+}
+
+function fail(error) {
+    alert("An error has occurred: Code = " + error.code);
+    console.log("upload error source " + error.source);
+    console.log("upload error target " + error.target);
+} 
+</script>
+</head>
+<body>
+   <a data-role="button" onClick="uploadFromGallery();">Upload from Gallery</a> 
+</body>

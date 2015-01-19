@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Capture Photo</title>
+
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    var pictureSource;   // picture source
+    var destinationType; // sets the format of returned value
+	var latitude;
+    var longitude;
+    var device_id;
+    // Wait for device API libraries to load
+    //
+    document.addEventListener("deviceready",onDeviceReady,false);
+
+    // device APIs are available
+    //
+       function onDeviceReady() {
+			var element = document.getElementById('geolocation');
+			device_id = device.uuid;
+           
+			navigator.geolocation.getCurrentPosition(onSuccess, onError, {timeout:10000});
+    	    pictureSource=navigator.camera.PictureSourceType;
+	        destinationType=navigator.camera.DestinationType;
+	    }
+		function onSuccess(position) {
+			latitude = position.coords.latitude;
+			longitude = position.coords.longitude;
+			capturePhoto();
+		}
+		function onError(error) {
+		}
+	    // Called when a photo is successfully retrieved
+	    //
+	    function onPhotoDataSuccess(imageData) {
+	      // Uncomment to view the base64-encoded image data
+	      // console.log(imageData);
+	
+	      // Get image handle
+	      //
+	      var smallImage = document.getElementById('smallImage');
+	
+	      // Unhide image elements
+	      //
+	      smallImage.style.display = 'block';
+	
+	      // Show the captured photo
+	      // The in-line CSS rules are used to resize the image
+	      //
+	      smallImage.src = "data:image/jpeg;base64," + imageData;
+	    }
+	
+	    // Called when a photo is successfully retrieved
+	    //
+	    function onPhotoURISuccess(imageURI) {
+	      // Uncomment to view the image file URI
+	      // console.log(imageURI);
+	
+	      // Get image handle
+	      //
+	      var largeImage = document.getElementById('largeImage');
+	
+	      // Unhide image elements
+	      //
+	      largeImage.style.display = 'block';
+	
+	      // Show the captured photo
+	      // The in-line CSS rules are used to resize the image
+	      //
+	      largeImage.src = imageURI;
+	      uploadPhoto(imageURI);
+	    }
+	
+	    // A button will call this function
+	    //
+	    function capturePhoto() {
+	      // Take picture using device camera and retrieve image as base64-encoded string
+			navigator.camera.getPicture(uploadPhoto, onFail, { quality: 50,
+	        destinationType: destinationType.FILE_URI });
+	    }
+	
+	    // A button will call this function
+	    //
+	    function capturePhotoEdit() {
+	      // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
+	      navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
+	        destinationType: destinationType.DATA_URL });
+	    }
+	
+	    // A button will call this function
+	    //
+	    function getPhoto(source) {
+	      // Retrieve image file location from specified source
+	      navigator.camera.getPicture(uploadPhoto, onFail, { quality: 50,
+	        destinationType: destinationType.FILE_URI,
+	        sourceType: source });
+	    }
+	
+	    // Called if something bad happens.
+	    //
+	    function onFail(message) {
+	      alert('Failed because: ' + message);
+	    }
+	
+		function uploadPhoto(imageURI) {
+			
+            
+			var options = new FileUploadOptions();
+			options.fileKey="file";
+			options.fileName=imageURI.substr(imageURI.lastIndexOf('/')+1);
+			options.mimeType="image/jpeg";
+			var params = new Object();
+			params.latitude = latitude;
+			params.longitude = longitude;
+			params.device_id = device_id;
+			options.params = params;
+			options.chunkedMode = false;
+			var ft = new FileTransfer();
+			ft.upload(imageURI, encodeURI("http://aditechsolutions.com/Nitesh/Indiaat75/upload.php"), win, fail, options);
+		}
+		function win(r) {
+			//console.log("Code = " + r.responseCode);
+			//console.log("Response = " + r.response);
+			//console.log("Sent = " + r.bytesSent);
+			//alert(r.response);
+			window.location.href="index.html";
+		}
+		function fail(error) {
+			alert("An error has occurred: Code = " = error.code);
+		}
+		
+    </script>
+    
+    
+    
+<style>
+#off
+{
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+
+#ajaxloader1, #ajaxloader2, #ajaxloader3, #ajaxloader4
+{
+	display: none;
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	left: 50%;
+	top: 15%;
+	margin: 0 0 0 -15px;
+	border: 8px solid #fff;
+	border-right-color: transparent;
+	border-radius: 50%;
+	box-shadow: 0 0 25px 2px #eee;
+	-webkit-animation: spin 1s linear infinite;
+	-moz-animation: spin 1s linear infinite;
+	-ms-animation: spin 1s linear infinite;
+	-o-animation: spin 1s linear infinite;
+	animation: spin 1s linear infinite;
+}
+
+#ajaxloader2
+{
+	border-right: 0 none;
+}
+
+#ajaxloader3
+{
+	border-left-color: transparent;
+}
+
+#ajaxloader4
+{
+	border-bottom-color: transparent;
+}
+
+#ajaxloader3::after, #ajaxloader4::after
+{
+	display: block;
+	content: " ";
+	width: 9px;
+	height: 9px;
+	border: 6px solid #fff;
+	margin: 4px;
+	border-radius: 50%;
+}
+
+#ajaxloader3::after
+{
+	border-left-color: transparent;
+	border-right-color: transparent;
+}
+
+#ajaxloader4::after
+{
+	width: 13px;
+	height: 13px;
+	margin: 1px;
+	border-width: 8px;
+	border-top-color: transparent;
+	border-left-color: transparent;
+}
+
+@-webkit-keyframes spin
+{
+	from { -webkit-transform: rotate(0deg); opacity: 0.4; }
+	50%  { -webkit-transform: rotate(180deg); opacity: 1; }
+	to   { -webkit-transform: rotate(360deg); opacity: 0.4; }
+}
+
+@-moz-keyframes spin
+{
+	from { -moz-transform: rotate(0deg); opacity: 0.4; }
+	50%  { -moz-transform: rotate(180deg); opacity: 1; }
+	to   { -moz-transform: rotate(360deg); opacity: 0.4; }
+}
+
+@-ms-keyframes spin
+{
+	from { -ms-transform: rotate(0deg); opacity: 0.4; }
+	50%  { -ms-transform: rotate(180deg); opacity: 1; }
+	to   { -ms-transform: rotate(360deg); opacity: 0.4; }
+}
+
+@-o-keyframes spin
+{
+	from { -o-transform: rotate(0deg); opacity: 0.4; }
+	50%  { -o-transform: rotate(180deg); opacity: 1; }
+	to   { -o-transform: rotate(360deg); opacity: 0.4; }
+}
+
+@keyframes spin
+{
+	from { transform: rotate(0deg); opacity: 0.2; }
+	50%  { transform: rotate(180deg); opacity: 1; }
+	to   { transform: rotate(360deg); opacity: 0.2; }
+}
+
+</style>
+    
+  </head>
+ 
+<body bgcolor="black">
+
+<div id="ajaxloader1"></div>
+<div id="ajaxloader2"></div>
+<div id="ajaxloader3"></div>
+<div id="ajaxloader4"></div>
+
+<script>
+document.getElementById("ajaxloader3").style.display = "block";
+</script>
+
+
+</body>
+
+</html>

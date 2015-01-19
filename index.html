@@ -1,0 +1,116 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    
+    <script type="text/javascript">
+    //<![CDATA[
+    document.addEventListener("deviceready",onDeviceReady,false);
+	function onDeviceReady() {
+		navigator.geolocation.getCurrentPosition(load, onError, {timeout:10000});
+	}
+	
+    var customIcons = {
+      restaurant: {
+        icon: 'images/t.png'
+      },
+      bar: {
+        icon: 'images/t.png'
+      }
+    };
+	function onError(error) {}
+	
+	function imIn(point, in_out) {
+		var device_id = device.uuid;
+		$.get("http://aditechsolutions.com/Nitesh/Indiaat75/im_in.php", { point: point, in_out: in_out, device_id: device_id} ).done(function( data ) {
+			alert(data );
+		});
+	}
+	
+	function discuss(point) {
+		var device_id = device.uuid;
+		$.get("http://aditechsolutions.com/Nitesh/Indiaat75/check_point.php", { point: point, device_id: device_id} ).done(function( data ) {
+			if (data=="false"){
+				alert("You are not in for cleaining. Please select I'm IN first.")
+			} else {
+				window.location.href="chat.html?point=" + point + "&device_id=" + device_id + "&im_in_id="+data;
+			}
+		});
+	}
+	
+    function load(position) {
+      var map = new google.maps.Map(document.getElementById("map"), {
+        center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+        zoom: 15,
+        mapTypeId: 'roadmap'
+      });
+      var infoWindow = new google.maps.InfoWindow;
+
+      // Change this depending on the name of your PHP file
+      $.get("http://aditechsolutions.com/Nitesh/Indiaat75/test.php", function( data ) {
+      //downloadUrl("http://aditechsolutions.com/Nitesh/Indiaat75/test.php", function(data) {
+        var xml = data;
+        var markers = xml.documentElement.getElementsByTagName("marker");
+        for (var i = 0; i < markers.length; i++) {
+          var name = markers[i].getAttribute("name");
+          var count = markers[i].getAttribute("count");
+          var type = markers[i].getAttribute("type");
+          var point = new google.maps.LatLng(
+              parseFloat(markers[i].getAttribute("lat")),
+              parseFloat(markers[i].getAttribute("lng")));
+          var html = "<img src='http://aditechsolutions.com/Nitesh/Indiaat75/uploads/" 
+              + name + ".jpg' width='200' height='150'>"
+              + "<br /><center><b><u>" + count + "</u> People are IN</b> <br /><a type=\"submit\" href=\"#\" onclick=\"discuss(" + name + ")\"> Discuss </a> &nbsp; &nbsp; &nbsp; <a type=\"submit\" href=\"#\" onclick=\"imIn(" + name + ", 'in')\"> I\'m IN</a>"
+              + "&nbsp; &nbsp; &nbsp; <a type=\"submit\" href=\"#\" onclick=\"imIn(" + name + ", 'out')\"> I\'m OUT </a></center>";
+          var icon = customIcons["bar"] || {};
+          var marker = new google.maps.Marker({
+            map: map,
+            position: point,
+            icon: icon.icon
+          });
+          bindInfoWindow(marker, map, infoWindow, html);
+        }
+      });
+    }
+
+    function bindInfoWindow(marker, map, infoWindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(html);
+        infoWindow.open(map, marker);
+      });
+    }
+
+    function downloadUrl(url) {
+      	$.ajax({
+			url: url,
+			success: console.log(),
+			dataType: dataType
+		});
+    }
+
+    function doNothing() {}
+
+    //]]>
+
+  </script>
+
+  </head>
+
+  <body style="margin: 0 0 0 0;">
+    <div id="map" style="height: 100vh;"></div>
+    <div style="position: fixed; bottom: 1em; right: 1em;">
+    	<button type="submit" class="btn btn-lg btn-success btn-block" onclick="window.location.href='capture_image.html'" value="Capture Garbage" > Capture Garbage </button>
+	</div>
+<!--     <div style="position: fixed; bottom: 1em; left: 1em;"> -->
+<!--     	<button type="submit" class="btn btn-lg btn-success btn-block" onclick="window.location.href='chat.html'" value="Chat" > &nbsp; &nbsp; &nbsp;Chat  &nbsp; &nbsp; </button> -->
+<!--     </div> -->
+  </body>
+
+</html>
